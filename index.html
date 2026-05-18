@@ -1,343 +1,824 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>Bubble Date Finder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Pretendard', sans-serif;
-      background: #f5f5f5;
-    }
-
-    .container {
-      padding: 16px;
-      max-width: 420px;
-      margin: 0 auto;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 700;
-      font-size: 1.1rem;
-    }
-
-    .logo {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #C88DDD, #9CEAFE);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
-
-    .logo::after {
-      content: "";
-      width: 18px;
-      height: 18px;
-      background-color: white;
-      -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
-      mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-      -webkit-mask-position: center;
-      mask-position: center;
-    }
-
-    .lang-btn {
-      background: black;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    /* 수정 1: 멤버 선택 탭 배경색을 로고와 동일한 그라데이션으로 변경 */
-    .members {
-      background: linear-gradient(135deg, #C88DDD, #9CEAFE);
-      border-radius: 30px;
-      padding: 4px;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-
-    /* 수정 2: 멤버 이름 폰트를 검정색으로 지정 */
-    .members button {
-      flex: 1;
-      border: none;
-      background: transparent;
-      padding: 8px 0;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 14px;
-      color: black; 
-      transition: 0.3s;
-    }
-
-    /* 수정 3: 활성화 효과를 유리 느낌(글래스모피즘)으로 변경 */
-    .members .active {
-      background: rgba(255, 255, 255, 0.4); /* 반투명한 흰색 배경 */
-      backdrop-filter: blur(4px); /* 배경 블러 처리 */
-      -webkit-backdrop-filter: blur(4px); /* 사파리 호환 */
-      border: 1px solid rgba(255, 255, 255, 0.5); /* 은은한 테두리 */
-      font-weight: bold;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .search-box {
-      display: flex;
-      align-items: center;
-      background: black;
-      border-radius: 30px;
-      padding: 6px 16px;
-      margin-bottom: 16px;
-      gap: 5px;
-      position: relative;
-    }
-
-    .calendar-icon {
-      color: white;
-      cursor: pointer;
-      font-size: 18px;
-      margin-right: 5px;
-    }
-
-    /* 수정 4: 모바일 달력 클릭 오류 방지를 위해 위치와 클릭 이벤트 제어 추가 */
-    #hiddenDateInput {
-      position: absolute;
-      left: -9999px; /* 화면 밖으로 완전히 밀어내어 간섭 방지 */
-      opacity: 0;
-      width: 0;
-      height: 0;
-      pointer-events: none; /* 의도치 않은 터치 방지 */
-    }
-
-    .search-box select {
-      background: transparent;
-      color: white;
-      border: none;
-      outline: none;
-      font-size: 15px;
-      cursor: pointer;
-      appearance: none;
-      -webkit-appearance: none;
-    }
-
-    .date-separator {
-      color: #777;
-      font-size: 14px;
-    }
-
-    /* 수정 7: 검색 버튼 스타일 변경 (그라데이션 배경, 흰색 폰트) */
-    .search-btn {
-      background: linear-gradient(135deg, #C88DDD, #9CEAFE);
-      color: white;
-      border: none;
-      padding: 6px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      white-space: nowrap;
-      margin-left: auto;
-    }
-
-    .result {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 16px;
-      padding: 30px 20px;
-      text-align: center;
-      margin-bottom: 24px;
-      min-height: 40px;
-      font-size: 18px;
-    }
-
-    /* 수정 5: 사진 출력 관련 CSS (.image-text) 삭제 */
-
-    .footer {
-      border-top: 1px solid #ccc;
-      padding-top: 20px;
-    }
-
-    .support-link {
-      color: #555;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고교 수학 탐구: 섀넌 정보이론 & 반도체 통신 한계 시뮬레이터</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MathJax for formula rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar for beautiful UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen pb-16">
 
-<div class="container">
-  <div class="header">
-    <div class="title">
-      <div class="logo"></div>
-      <span id="titleText">aespa bubble date finder</span>
+    <!-- 상단 탐구 히어로 영역 -->
+    <div class="bg-gradient-to-b from-slate-900 via-slate-950 to-[#0b0f19] border-b border-slate-800 py-12 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <span class="px-3 py-1 text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full tracking-wider uppercase">High School Math & Physics Exploration</span>
+            <h1 class="text-3xl md:text-5xl font-black mt-4 tracking-tight leading-tight">
+                로그함수로 연결하는 <br class="md:hidden">
+                <span class="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">정보량, 엔트로피, 그리고 반도체</span>
+            </h1>
+            <p class="text-slate-400 mt-4 text-sm md:text-base max-w-3xl mx-auto">
+                이 시뮬레이터는 고등학교 수학 탐구 과제를 위해 설계되었습니다. 단순한 수식 암기를 넘어, 확률과 로그의 관계에서 시작해 미세 반도체 소자가 직면한 물리적 전송 한계까지를 4단계에 걸쳐 직관적으로 이해할 수 있습니다.
+            </p>
+            
+            <!-- 단계 바로가기 네비게이션 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto mt-8">
+                <button onclick="scrollToSection('step1')" class="p-3 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 rounded-xl transition text-left">
+                    <span class="text-xs font-bold text-cyan-400 block mb-1">01단계. 수학적 기반</span>
+                    <span class="text-xs font-semibold text-slate-200">왜 하필 로그($\log$)인가?</span>
+                </button>
+                <button onclick="scrollToSection('step2')" class="p-3 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 rounded-xl transition text-left">
+                    <span class="text-xs font-bold text-indigo-400 block mb-1">02단계. 확률과 기댓값</span>
+                    <span class="text-xs font-semibold text-slate-200">정보 엔트로피 $H(X)$</span>
+                </button>
+                <button onclick="scrollToSection('step3')" class="p-3 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 rounded-xl transition text-left">
+                    <span class="text-xs font-bold text-purple-400 block mb-1">03단계. 극한과 용량</span>
+                    <span class="text-xs font-semibold text-slate-200">섀넌-하틀리 로그 곡선</span>
+                </button>
+                <button onclick="scrollToSection('step4')" class="p-3 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 rounded-xl transition text-left">
+                    <span class="text-xs font-bold text-emerald-400 block mb-1">04단계. 공학적 응용</span>
+                    <span class="text-xs font-semibold text-slate-200">반도체 열잡음 & 데이터 전송</span>
+                </button>
+            </div>
+        </div>
     </div>
-    <button class="lang-btn" onclick="toggleLang()">KR / EN</button>
-  </div>
 
-  <div class="members">
-    <button onclick="selectMember(this)" class="active" data-en="Karina" data-ko="카리나">Karina</button>
-    <button onclick="selectMember(this)" data-en="Giselle" data-ko="지젤">Giselle</button>
-    <button onclick="selectMember(this)" data-en="Winter" data-ko="윈터">Winter</button>
-    <button onclick="selectMember(this)" data-en="Ningning" data-ko="닝닝">Ningning</button>
-  </div>
+    <!-- 메인 콘텐츠 컨테이너 -->
+    <main class="max-w-6xl mx-auto px-4 mt-12 space-y-16">
 
-  <div class="search-box">
-    <span class="calendar-icon" onclick="openCalendar()">📅</span>
-    <input type="date" id="hiddenDateInput" onchange="syncFromCalendar(this.value)">
-    
-    <select id="yearSelect"></select>
-    <span class="date-separator">-</span>
-    <select id="monthSelect"></select>
-    <span class="date-separator">-</span>
-    <select id="daySelect"></select>
-    
-    <button class="search-btn" id="searchBtn" onclick="search()">search</button>
-  </div>
+        <!-- STEP 1: 정보량 공식과 로그의 필연성 -->
+        <section id="step1" class="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-8 transition-all hover:border-slate-700/50">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <span class="text-xs font-bold text-cyan-400 tracking-widest uppercase">Step 01. 수학적 기초</span>
+                    <h2 class="text-2xl font-extrabold mt-1">정보량 공식과 로그($\log_2$)의 필연성</h2>
+                </div>
+                <div class="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-lg text-xs font-semibold">
+                    교과 연계: 수학Ⅰ (로그함수), 확률과 통계 (독립사건)
+                </div>
+            </div>
 
-  <div class="result" id="resultBox">Select a date and press search.</div>
-  
-  <div class="footer">
-    <a href="https://x.com/aespaBBfinder" target="_blank" class="support-link">Support</a>
-  </div>
-</div>
+            <!-- 설명 및 탐구 포인트 -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+                <div class="lg:col-span-5 space-y-4">
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        사건 $A$가 일어날 확률을 $P(A)$라고 할 때, 그 사건이 가진 정보량 $I(A)$는 다음과 같이 정의됩니다.
+                        $$I(A) = \log_2 \left(\frac{1}{P(A)}\right) = -\log_2 P(A)$$
+                    </p>
+                    <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 text-xs text-slate-400 space-y-2">
+                        <strong class="text-slate-200 block">💡 수학적 탐구 질문: 왜 곱하기를 더하기로 만들어야 할까?</strong>
+                        동전 2개를 던질 때 '앞면-앞면'이 나올 사건 $A \cap B$는 독립사건이므로 확률은 곱해집니다.
+                        $$P(A \cap B) = P(A) \times P(B)$$
+                        그러나 우리가 얻은 직관적인 정보의 총량은 두 정보를 각각 얻었을 때의 합과 같아야 합니다.
+                        $$I(A \cap B) = I(A) + I(B)$$
+                        이 성질, 즉 <span class="text-cyan-400 font-semibold">"곱셈 성질을 가진 확률을 덧셈 성질을 가진 정보량으로 변환"</span>해 주는 함수가 바로 <strong>로그함수</strong>인 것입니다.
+                    </div>
+                </div>
 
-<script>
-let currentLang = "EN";
+                <!-- 실시간 집합 연산 및 수식 증명 시각화 -->
+                <div class="lg:col-span-7 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                    <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span> 독립 사건 확률과 정보량의 가산성(Additivity) 확인
+                    </h3>
 
-function initDateSelects() {
-  const yearSelect = document.getElementById("yearSelect");
-  const monthSelect = document.getElementById("monthSelect");
-  const daySelect = document.getElementById("daySelect");
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- 사건 A 제어 -->
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-slate-200">사건 A (예: 비가 올 확률)</span>
+                                <span class="code-font text-xs text-cyan-400 font-bold" id="p-a-label">P(A) = 0.50</span>
+                            </div>
+                            <input type="range" id="slider-p-a" min="0.05" max="0.95" step="0.05" value="0.5" oninput="calculateStep1()" class="w-full accent-cyan-400">
+                            <div class="text-xs text-slate-400 mt-2 flex justify-between">
+                                <span>정보량:</span>
+                                <span class="code-font text-cyan-300 font-bold" id="i-a-label">1.00 bits</span>
+                            </div>
+                        </div>
 
-  const currentYear = new Date().getFullYear();
-  for (let i = currentYear + 1; i >= 2020; i--) {
-    let opt = new Option(i, i);
-    yearSelect.add(opt);
-  }
-  yearSelect.value = currentYear;
+                        <!-- 사건 B 제어 -->
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-slate-200">사건 B (예: 버스가 연착될 확률)</span>
+                                <span class="code-font text-xs text-indigo-400 font-bold" id="p-b-label">P(B) = 0.25</span>
+                            </div>
+                            <input type="range" id="slider-p-b" min="0.05" max="0.95" step="0.05" value="0.25" oninput="calculateStep1()" class="w-full accent-indigo-400">
+                            <div class="text-xs text-slate-400 mt-2 flex justify-between">
+                                <span>정보량:</span>
+                                <span class="code-font text-indigo-300 font-bold" id="i-b-label">2.00 bits</span>
+                            </div>
+                        </div>
+                    </div>
 
-  for (let i = 1; i <= 12; i++) {
-    let val = i < 10 ? '0' + i : i;
-    monthSelect.add(new Option(val, val));
-  }
+                    <!-- 수학적 정합성 실시간 비교 패널 -->
+                    <div class="bg-cyan-950/20 border border-cyan-500/20 p-4 rounded-xl space-y-3">
+                        <div class="flex justify-between items-center text-xs pb-2 border-b border-cyan-500/10">
+                            <span class="text-slate-300 font-medium">두 독립 사건의 동시 확률 (곱의 법칙)</span>
+                            <span class="code-font text-slate-100 font-bold" id="p-joint-math">0.50 × 0.25 = 0.125</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-300 font-medium">동시 정보량 (로그 연산)</span>
+                            <span class="code-font text-cyan-300 font-bold" id="i-joint-math">-\log_2(0.125) = 3.00 bits</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-300 font-medium">정보량의 합산값 확인</span>
+                            <span class="code-font text-indigo-300 font-bold" id="i-sum-math">I(A) + I(B) = 1.00 + 2.00 = 3.00 bits</span>
+                        </div>
+                    </div>
 
-  for (let i = 1; i <= 31; i++) {
-    let val = i < 10 ? '0' + i : i;
-    daySelect.add(new Option(val, val));
-  }
-}
+                    <!-- 시각적 집합 구체 표현 -->
+                    <div class="mt-4 flex items-center justify-center gap-4 bg-slate-900/30 p-3 rounded-lg border border-slate-800 text-[11px] text-slate-400">
+                        <span>확률 공간의 비중:</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 bg-cyan-400 rounded-sm inline-block"></span>
+                            <span>A 영역 (<span id="box-a-pct">50%</span>)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 bg-indigo-400 rounded-sm inline-block"></span>
+                            <span>B 영역 (<span id="box-b-pct">25%</span>)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 bg-emerald-400 rounded-sm inline-block"></span>
+                            <span>결합 영역 $A \cap B$ (<span id="box-joint-pct">12.5%</span>)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-initDateSelects();
+        <!-- STEP 2: 정보량 공식을 바탕으로 한 정보 엔트로피 -->
+        <section id="step2" class="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-8 transition-all hover:border-slate-700/50">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <span class="text-xs font-bold text-indigo-400 tracking-widest uppercase">Step 02. 확률과 기댓값</span>
+                    <h2 class="text-2xl font-extrabold mt-1">정보 엔트로피 $H(X)$ 와 무질서도</h2>
+                </div>
+                <div class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-lg text-xs font-semibold">
+                    교과 연계: 확률과 통계 (이산확률변수의 기댓값)
+                </div>
+            </div>
 
-function openCalendar() {
-  document.getElementById("hiddenDateInput").showPicker();
-}
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- 제어와 수식 설명 -->
+                <div class="lg:col-span-5 space-y-4 flex flex-col justify-between">
+                    <div>
+                        <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                            개별 정보량 $I(x_i)$의 기댓값(평균 정보량)을 구한 공식이 바로 <strong>섀넌 엔트로피(Shannon Entropy)</strong>입니다.
+                            $$H(X) = \sum_{i} P(x_i) I(x_i) = -\sum_{i} P(x_i) \log_2 P(x_i)$$
+                        </p>
+                        <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 text-xs text-slate-400 space-y-2">
+                            <strong class="text-slate-200 block">💡 수학적 탐구 질문: 언제 불확실성이 극대화될까?</strong>
+                            3가지의 결과 메시지(A, B, C)가 존재할 때, 특정 메시지 하나가 일어날 확률이 100%에 가까우면 예측하기 쉬워지므로 엔트로피(평균 정보량)는 0에 수렴합니다. 반대로 모든 메시지가 일어날 확률이 정확히 삼등분($1/3 \approx 33.3\%$)될 때 엔트로피는 극대값을 가집니다.
+                        </div>
+                    </div>
 
-function syncFromCalendar(val) {
-  if(!val) return;
-  const [y, m, d] = val.split('-');
-  document.getElementById("yearSelect").value = y;
-  document.getElementById("monthSelect").value = m;
-  document.getElementById("daySelect").value = d;
-}
+                    <div class="bg-indigo-950/30 border border-indigo-500/20 p-5 rounded-xl text-center space-y-1 mt-4">
+                        <span class="text-xs text-indigo-300 block">계산된 정보 엔트로피 기댓값</span>
+                        <div class="text-3xl font-black text-indigo-400 code-font">
+                            H(X) = <span id="val-step2-entropy">1.500</span> <span class="text-xs font-normal text-slate-400">bits/symbol</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400 block" id="entropy-msg">모든 확률이 균등할 때 최대 1.585 bits에 도달할 수 있습니다.</span>
+                    </div>
+                </div>
 
-function toggleLang() {
-  currentLang = (currentLang === "EN") ? "KO" : "EN";
-  const titleText = document.getElementById("titleText");
-  const searchBtn = document.getElementById("searchBtn");
-  const memberButtons = document.querySelectorAll(".members button");
-  const resultBox = document.getElementById("resultBox");
+                <!-- 인터랙티브 슬라이더 및 원형 차트 -->
+                <div class="lg:col-span-7 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row gap-6 items-center">
+                    <!-- 확률 조정 슬라이더 묶음 -->
+                    <div class="w-full md:w-1/2 space-y-4">
+                        <h3 class="text-xs font-bold text-slate-300 tracking-wider uppercase mb-2">각 메시지 발생 확률 제어</h3>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-pink-500 inline-block"></span> 메시지 A ($P_1$)</span>
+                                <span class="code-font text-pink-400 font-bold" id="p1-label">33.3%</span>
+                            </div>
+                            <input type="range" id="slider-p1" min="0" max="100" value="33" oninput="balanceProbability(1)" class="w-full accent-pink-500">
+                        </div>
 
-  if (currentLang === "KO") {
-    titleText.innerText = "에스파 버블 날짜 검색기";
-    searchBtn.innerText = "검색";
-    memberButtons.forEach(btn => btn.innerText = btn.getAttribute("data-ko"));
-    if(resultBox.innerText.includes("Select a date")) resultBox.innerText = "날짜를 선택하고 검색을 누르세요.";
-  } else {
-    titleText.innerText = "aespa bubble date finder";
-    searchBtn.innerText = "search";
-    memberButtons.forEach(btn => btn.innerText = btn.getAttribute("data-en"));
-    if(resultBox.innerText.includes("날짜를 선택하고")) resultBox.innerText = "Select a date and press search.";
-  }
-}
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-indigo-500 inline-block"></span> 메시지 B ($P_2$)</span>
+                                <span class="code-font text-indigo-400 font-bold" id="p2-label">33.3%</span>
+                            </div>
+                            <input type="range" id="slider-p2" min="0" max="100" value="33" oninput="balanceProbability(2)" class="w-full accent-indigo-500">
+                        </div>
 
-function selectMember(btn) {
-  document.querySelectorAll(".members button").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-}
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-cyan-500 inline-block"></span> 메시지 C ($P_3$)</span>
+                                <span class="code-font text-cyan-400 font-bold" id="p3-label">33.4%</span>
+                            </div>
+                            <input type="range" id="slider-p3" min="0" max="100" value="34" oninput="balanceProbability(3)" class="w-full accent-cyan-500">
+                        </div>
 
-async function search() {
-  const y = document.getElementById("yearSelect").value;
-  const m = document.getElementById("monthSelect").value;
-  const d = document.getElementById("daySelect").value;
-  const selectedDate = `${y}-${m}-${d}`;
-  
-  const resultBox = document.getElementById("resultBox");
-  // 수정 5: imageOutput 변수 및 관련 로직 삭제
-  
-  const activeMember = document.querySelector(".members .active").getAttribute("data-en");
-  
-  resultBox.innerText = currentLang === "KO" ? "데이터를 불러오는 중..." : "Loading data...";
-  
-  const apiUrl = `https://opensheet.elk.sh/1GZMXgQHTZnHapcQui71NyFa6BVaJvzGARFECckuLFoE/${activeMember}`;
+                        <div class="text-[10px] text-slate-500 leading-relaxed border-t border-slate-800/80 pt-2">
+                            * 세 확률의 합은 물리 법칙상 항상 정확히 100%가 되도록 실시간 자동 보정 연산됩니다.
+                        </div>
+                    </div>
 
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
+                    <!-- 실시간 분포 차트 시각화 -->
+                    <div class="w-full md:w-1/2 flex flex-col items-center justify-center">
+                        <div class="w-44 h-44 relative">
+                            <canvas id="entropyPieChart"></canvas>
+                        </div>
+                        <span class="text-xs text-slate-400 mt-3 font-semibold">메시지별 확률 공간 분포 비율</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    if (!data || data.length === 0) {
-      throw new Error("Sheet is empty");
-    }
+        <!-- STEP 3: 섀넌-하틀리 정리와 로그 함수 그래프의 특성 -->
+        <section id="step3" class="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-8 transition-all hover:border-slate-700/50">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <span class="text-xs font-bold text-purple-400 tracking-widest uppercase">Step 03. 함수와 극한</span>
+                    <h2 class="text-2xl font-extrabold mt-1">섀넌-하틀리 정리와 로그 곡선 제어</h2>
+                </div>
+                <div class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-lg text-xs font-semibold">
+                    교과 연계: 수학Ⅰ (로그함수의 그래프와 평행/대칭이동)
+                </div>
+            </div>
 
-    const firstRowKeys = Object.keys(data[0]);
-    const colAKey = firstRowKeys[0]; 
-    const colBKey = firstRowKeys[1]; 
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- 제어 및 수학 탐구 -->
+                <div class="lg:col-span-4 space-y-4 flex flex-col justify-between">
+                    <div>
+                        <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                            채널 한계 속도를 정의하는 섀넌-하틀리 정리는 로그함수의 변형 꼴입니다.
+                            $$C = B \log_2\left(1 + \text{SNR}\right)$$
+                        </p>
+                        <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 text-xs text-slate-400 space-y-3">
+                            <strong class="text-slate-200 block">💡 수학적 탐구 질문: 변인이 함수의 기하학적 형태를 어떻게 바꿀까?</strong>
+                            <div>
+                                <span class="text-purple-400 font-bold block">1. 대역폭 $B$의 변화:</span>
+                                로그함수 외부에 곱해져 있으므로, 그래프의 $y$축 방향 확장(기울기 증가)을 가져옵니다.
+                            </div>
+                            <div>
+                                <span class="text-amber-400 font-bold block">2. SNR의 변화:</span>
+                                로그함수 내부에 있으므로, 독립변수 $x$에 따른 대수적 완만 곡선 형성에 기여하며 수렴 성향을 보입니다.
+                            </div>
+                        </div>
+                    </div>
 
-    const matchedRow = data.find(row => {
-      const sheetDate = String(row[colBKey] || "").trim();
-      return sheetDate === selectedDate;
-    });
+                    <!-- 실시간 매개변수 통계 -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">대역폭 수치 (B):</span>
+                            <span class="code-font text-purple-400 font-bold" id="step3-b-val">1.00 MHz</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">선형 신호대잡음비 (SNR):</span>
+                            <span class="code-font text-amber-400 font-bold" id="step3-snr-val">10.0 배</span>
+                        </div>
+                        <div class="flex justify-between text-xs pt-2 border-t border-slate-800">
+                            <span class="text-slate-300 font-semibold">최대 도달 속도 (C):</span>
+                            <span class="code-font text-emerald-400 font-bold" id="step3-cap-val">3.46 Mbps</span>
+                        </div>
+                    </div>
+                </div>
 
-    const notFoundText = currentLang === "KO" ? "버블이 검색되지 않음" : "Bubble not found";
+                <!-- 인터랙티브 슬라이더 및 Chart -->
+                <div class="lg:col-span-8 bg-slate-950/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between h-[400px]">
+                    <div class="flex flex-col md:flex-row gap-4 mb-3">
+                        <!-- B 조절 -->
+                        <div class="flex-1">
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>로그 곡선 외부 확대상수 $B$ (대역폭)</span>
+                                <span class="code-font text-purple-400" id="step3-slider-b-lbl">1.0 MHz</span>
+                            </div>
+                            <input type="range" id="step3-slider-b" min="0.5" max="5.0" step="0.1" value="1.0" oninput="updateStep3Sim()" class="w-full accent-purple-500">
+                        </div>
+                        <!-- SNR 조절 -->
+                        <div class="flex-1">
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>로그 곡선 내부 진수변인 $x$ (SNR)</span>
+                                <span class="code-font text-amber-400" id="step3-slider-snr-lbl">10 배</span>
+                            </div>
+                            <input type="range" id="step3-slider-snr" min="1" max="100" step="1" value="10" oninput="updateStep3Sim()" class="w-full accent-amber-500">
+                        </div>
+                    </div>
 
-    if (matchedRow) {
-      const colAValue = matchedRow[colAKey];
-      
-      if (!colAValue || String(colAValue).trim() === "") {
-        resultBox.innerText = notFoundText;
-      } else {
-        resultBox.innerText = colAValue;
-      }
-    } else {
-      resultBox.innerText = notFoundText;
-    }
+                    <!-- 그래프 -->
+                    <div class="flex-1 relative">
+                        <canvas id="step3CurveChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    resultBox.innerText = currentLang === "KO" ? "데이터를 불러오는 데 실패했습니다." : "Failed to load data.";
-  }
-}
-</script>
+        <!-- STEP 4: 반도체 채널 통신 응용 시뮬레이션 -->
+        <section id="step4" class="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-8 transition-all hover:border-slate-700/50">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <span class="text-xs font-bold text-emerald-400 tracking-widest uppercase">Step 04. 공학적 융합 탐구</span>
+                    <h2 class="text-2xl font-extrabold mt-1">반도체 열잡음(Noise) 극복 및 실제 데이터 전송 가상 실험</h2>
+                </div>
+                <div class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg text-xs font-semibold">
+                    교과 연계: 물리Ⅰ (열역학, 반도체), 수학 (실생활 응용)
+                </div>
+            </div>
 
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- 물리 제어 인터페이스 -->
+                <div class="lg:col-span-4 bg-slate-950/80 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xs font-bold text-emerald-400 tracking-wider uppercase mb-4">반도체 작동 물리적 상태 설정</h3>
+
+                        <!-- 작동 온도 T -->
+                        <div class="mb-5">
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>반도체 소자 온도 ($T$)</span>
+                                <span class="code-font text-emerald-400 font-bold" id="val-step4-temp">27 °C (300 K)</span>
+                            </div>
+                            <input type="range" id="slider-step4-temp" min="-100" max="150" step="5" value="27" oninput="updateStep4Sim()" class="w-full accent-emerald-500">
+                            <span class="text-[10px] text-slate-500 block mt-1">온도가 높을수록 실리콘 채널 속 전자의 열동요가 커져 노이즈가 급증합니다.</span>
+                        </div>
+
+                        <!-- 전압 S -->
+                        <div class="mb-5">
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>트랜지스터 구동 전압 ($V_{dd}$ / 신호세기)</span>
+                                <span class="code-font text-emerald-400 font-bold" id="val-step4-volt">1.20 V</span>
+                            </div>
+                            <input type="range" id="slider-step4-volt" min="0.3" max="3.0" step="0.1" value="1.2" oninput="updateStep4Sim()" class="w-full accent-emerald-500">
+                            <span class="text-[10px] text-slate-500 block mt-1">전압이 강할수록 뚜렷한 신호(S)가 유지되나 전력 효율은 크게 하락합니다.</span>
+                        </div>
+
+                        <!-- 가상 미세공정 인자 -->
+                        <div class="mb-5">
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>반도체 채널 미세화 수준 (Gate Width)</span>
+                                <span class="code-font text-emerald-400 font-bold" id="val-step4-node">7 nm</span>
+                            </div>
+                            <input type="range" id="slider-step4-node" min="2" max="28" step="1" value="7" oninput="updateStep4Sim()" class="w-full accent-emerald-500">
+                            <span class="text-[10px] text-slate-500 block mt-1">미세화될수록 기생 저항이 커져 thermal noise가 상대적으로 증가합니다.</span>
+                        </div>
+                    </div>
+
+                    <!-- 실시간 물리적 섀넌 계산 수치 -->
+                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2 mt-4">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">물리 잡음 크기 ($N_{thermal}$):</span>
+                            <span class="code-font text-pink-400 font-bold" id="step4-noise-level">0.12 mW</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">현재 수치상 SNR:</span>
+                            <span class="code-font text-amber-400 font-bold" id="step4-snr-db">10.80 dB</span>
+                        </div>
+                        <div class="flex justify-between text-xs pt-2 border-t border-slate-800">
+                            <span class="text-emerald-400 font-bold">도달 최대 전송 속도:</span>
+                            <span class="code-font text-emerald-400 font-bold" id="step4-max-capacity">3.67 Mbps</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 데이터 왜곡 시각 전송 시뮬레이터 -->
+                <div class="lg:col-span-8 bg-slate-950/80 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-sm font-bold text-slate-200">데이터 전송 중 발생하는 비트 왜곡 실시간 관측</h3>
+                            <span class="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded">가상 송신 테스트기</span>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                            현재 설계된 채널 상태를 통과해 전송되는 원본 데이터와 물리적 잡음에 의하여 0과 1이 뒤바뀌어 깨진 데이터를 비교해보세요. 온도가 올라가거나 전압이 내려가면, 데이터의 에러율이 무섭게 치솟는 것을 관찰할 수 있습니다.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- 송신 원본 -->
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 flex flex-col items-center">
+                            <span class="text-xs font-semibold text-slate-300 block mb-2 text-center">송신용 8x8 비트맵 패턴 (원본)</span>
+                            <div class="grid grid-cols-8 gap-1.5 w-36 h-36" id="grid-tx">
+                                <!-- JS에서 동적 주입 -->
+                            </div>
+                            <span class="text-[10px] text-slate-500 mt-2">안정적인 고수준 패턴 데이터</span>
+                        </div>
+
+                        <!-- 수신 결과 및 노이즈 오류 -->
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 flex flex-col items-center">
+                            <span class="text-xs font-semibold text-slate-300 block mb-2 text-center">수신된 8x8 비트맵 패턴 (노이즈 개입)</span>
+                            <div class="grid grid-cols-8 gap-1.5 w-36 h-36" id="grid-rx">
+                                <!-- JS에서 동적 주입 -->
+                            </div>
+                            <div class="text-[10px] text-slate-400 mt-2 text-center font-semibold">
+                                데이터 깨짐 에러율(Error Rate): <span class="text-pink-400 code-font" id="val-error-rate">0.0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-emerald-950/20 border border-emerald-500/10 rounded-xl flex items-center gap-3">
+                        <span class="text-xl">💡</span>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            <strong>탐구 시사점:</strong> 반도체 미세화로 채널 전압은 감소하지만, 열 발산 악화로 노이즈가 급증하여 원래 전달하고픈 디지털 정보가 훼손됩니다. 이를 복구하기 위해 반도체 메모리 칩 내부에는 오류를 교정하는 복잡한 수학적 해밍 코드(ECC) 및 오류정정 연산장치가 함께 구동되고 있습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 탐구 보고서 작성 팁 -->
+        <section class="bg-gradient-to-r from-slate-950 to-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8">
+            <h3 class="text-lg font-black text-slate-200 mb-6 flex items-center gap-2">
+                <span class="w-2.5 h-6 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-sm inline-block"></span>
+                고등학교 수학 탐구보고서 세특 연계 추천 가이드
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300">
+                <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-cyan-400 mb-2">교과 역량 강화 (수학Ⅰ)</h4>
+                    <p class="text-xs leading-relaxed text-slate-400">
+                        단순히 수치를 계산하는 것에서 벗어나, 독립 확률의 곱셈 성질을 덧셈 형태의 정보 총합으로 정합해주기 위해 도입된 <strong>로그함수의 성질(가산성)</strong>을 증명하고, 밑이 2인 로그함수가 이진수(Binary) 컴퓨터 통신의 구조적 수학의 기초가 됨을 기술할 수 있습니다.
+                    </p>
+                </div>
+                <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-indigo-400 mb-2">실생활 기댓값 (확률과 통계)</h4>
+                    <p class="text-xs leading-relaxed text-slate-400">
+                        수학 시간에 배우는 '이산확률변수의 기댓값' 개념을 그대로 가져온 <strong>정보 엔트로피 $H(X)$</strong>를 응용합니다. 확률들의 가중 평균으로서 엔트로피가 극대화되는 '모든 확률이 동일한 균등분포'의 특징을 수학적 미분 또는 기하학적으로 유도하고 고찰해 봅니다.
+                    </p>
+                </div>
+                <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-emerald-400 mb-2">다학제 융합 (물리-공학 연계)</h4>
+                    <p class="text-xs leading-relaxed text-slate-400">
+                        물리학의 열역학과 전자통신, 나노 반도체 공정을 연결합니다. 열로 인한 전자의 물리적 잡음(Noise)의 특성과, 트랜지스터 전압 한계로 인한 섀넌 한계 수렴 현상을 설명함으로써 <strong>"수학적 정리인 섀넌의 법칙이 반도체 하드웨어 설계의 극한 한계를 결정짓는 원동력"</strong>임을 융합 분석해 봅니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 text-center text-xs text-slate-600">
+        © 2026 High School Science-Math Convergence Exploration Simulator. Powered by Claude Shannon.
+    </footer>
+
+    <!-- JavaScript - 실시간 동작 제어 프로그램 -->
+    <script>
+        // 전역 차트 객체 정의
+        let entropyPieChart = null;
+        let step3CurveChart = null;
+
+        // 원본 8x8 데이터맵 (섀넌의 얼굴 모양을 본딴 이진수 패턴)
+        const originalBitmap = [
+            [0,0,1,1,1,1,0,0],
+            [0,1,1,0,0,1,1,0],
+            [1,1,0,0,0,0,1,1],
+            [1,1,0,1,1,0,1,1],
+            [1,1,0,0,0,0,1,1],
+            [0,1,1,1,1,1,1,0],
+            [0,0,1,0,0,1,0,0],
+            [0,0,1,1,1,1,0,0]
+        ];
+
+        window.onload = function() {
+            // 차트 구성 요소 빌드 시작
+            initEntropyPie();
+            initStep3Curve();
+            
+            // 전 영역 초기 연산 동작 개시
+            calculateStep1();
+            balanceProbability(1); // 이 내부에서 updateEntropySim도 자동호출
+            updateStep3Sim();
+            updateStep4Sim();
+            buildOriginalGrid();
+        }
+
+        // 특정 영역 부드러운 스크롤 이동 함수
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- STEP 1: 곱의 법칙과 합의 법칙 실시간 매치 연산 ---
+        function calculateStep1() {
+            const pa = parseFloat(document.getElementById('slider-p-a').value);
+            const pb = parseFloat(document.getElementById('slider-p-b').value);
+
+            // 레이블 갱신
+            document.getElementById('p-a-label').innerText = `P(A) = ${pa.toFixed(2)}`;
+            document.getElementById('p-b-label').innerText = `P(B) = ${pb.toFixed(2)}`;
+
+            // 개별 정보량 계산 I(x) = -log2(p)
+            const ia = -Math.log2(pa);
+            const ib = -Math.log2(pb);
+
+            document.getElementById('i-a-label').innerText = `${ia.toFixed(2)} bits`;
+            document.getElementById('i-b-label').innerText = `${ib.toFixed(2)} bits`;
+
+            // 곱의 확률과 가산 정보량
+            const jointP = pa * pb;
+            const jointI = -Math.log2(jointP);
+            const sumI = ia + ib;
+
+            document.getElementById('p-joint-math').innerText = `${pa.toFixed(2)} × ${pb.toFixed(2)} = ${jointP.toFixed(4)}`;
+            document.getElementById('i-joint-math').innerText = `-\\log_2(${jointP.toFixed(4)}) = ${jointI.toFixed(2)} bits`;
+            document.getElementById('i-sum-math').innerText = `I(A) + I(B) = ${ia.toFixed(2)} + ${ib.toFixed(2)} = ${sumI.toFixed(2)} bits`;
+
+            // 퍼센테이지 표출
+            document.getElementById('box-a-pct').innerText = `${Math.round(pa * 100)}%`;
+            document.getElementById('box-b-pct').innerText = `${Math.round(pb * 100)}%`;
+            document.getElementById('box-joint-pct').innerText = `${(jointP * 100).toFixed(1)}%`;
+        }
+
+        // --- STEP 2: 세 확률 가중평균 및 엔트로피 도출 ---
+        function balanceProbability(changedIndex) {
+            let p1 = parseInt(document.getElementById('slider-p1').value);
+            let p2 = parseInt(document.getElementById('slider-p2').value);
+            let p3 = parseInt(document.getElementById('slider-p3').value);
+
+            // 세 확률의 총합 맞추기 (100% 한계치 유지 규칙 보정 알고리즘)
+            let total = p1 + p2 + p3;
+            if (total !== 100) {
+                let diff = 100 - total;
+                // 수정하지 않은 변수를 유동적으로 배분
+                if (changedIndex === 1) {
+                    p2 += Math.floor(diff / 2);
+                    p3 = 100 - p1 - p2;
+                } else if (changedIndex === 2) {
+                    p1 += Math.floor(diff / 2);
+                    p3 = 100 - p1 - p2;
+                } else {
+                    p1 += Math.floor(diff / 2);
+                    p2 = 100 - p1 - p3;
+                }
+            }
+
+            // 바운더리 조건 안전 검정
+            if (p1 < 0) { p2 += p1; p1 = 0; }
+            if (p2 < 0) { p3 += p2; p2 = 0; }
+            if (p3 < 0) { p1 += p3; p3 = 0; }
+
+            // 슬라이더 동적 재셋팅
+            document.getElementById('slider-p1').value = p1;
+            document.getElementById('slider-p2').value = p2;
+            document.getElementById('slider-p3').value = p3;
+
+            // 라벨 인쇄
+            document.getElementById('p1-label').innerText = `${p1.toFixed(1)}%`;
+            document.getElementById('p2-label').innerText = `${p2.toFixed(1)}%`;
+            document.getElementById('p3-label').innerText = `${p3.toFixed(1)}%`;
+
+            // 엔트로피 전격 계산 H = -sum(p * log2(p))
+            let h = 0;
+            const plist = [p1/100, p2/100, p3/100];
+            plist.forEach(p => {
+                if (p > 0) {
+                    h -= p * Math.log2(p);
+                }
+            });
+
+            document.getElementById('val-step2-entropy').innerText = h.toFixed(3);
+
+            // 팁 텍스트 멘트 실시간 제어
+            const msgEl = document.getElementById('entropy-msg');
+            if (Math.abs(h - 1.5849) < 0.01) {
+                msgEl.innerText = "축하합니다! 확률 삼등분으로 최대 엔트로피 한계점 1.585 bits에 완벽 도달했습니다!";
+                msgEl.className = "text-[10px] text-emerald-400 font-bold block";
+            } else {
+                msgEl.innerText = "모든 확률이 고르게 삼등분(33.3%, 33.3%, 33.4%)될 때 불예측성이 최고가 되어 최대 엔트로피에 가깝게 상승합니다.";
+                msgEl.className = "text-[10px] text-slate-400 block";
+            }
+
+            // 차트 그래픽스 갱신
+            entropyPieChart.data.datasets[0].data = [p1, p2, p3];
+            entropyPieChart.update('none');
+        }
+
+        function initEntropyPie() {
+            const ctx = document.getElementById('entropyPieChart').getContext('2d');
+            entropyPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['A', 'B', 'C'],
+                    datasets: [{
+                        data: [33, 33, 34],
+                        backgroundColor: [
+                            'rgba(236, 72, 153, 0.7)',  // pink-500
+                            'rgba(99, 102, 241, 0.7)', // indigo-500
+                            'rgba(6, 182, 212, 0.7)'   // cyan-500
+                        ],
+                        borderColor: '#0f172a',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // --- STEP 3: 섀넌 하틀리 수학적 곡선 거동 조절 ---
+        function updateStep3Sim() {
+            const B = parseFloat(document.getElementById('step3-slider-b').value);
+            const snr = parseFloat(document.getElementById('step3-slider-snr').value);
+
+            // 레이블 동기화
+            document.getElementById('step3-slider-b-lbl').innerText = `${B.toFixed(1)} MHz`;
+            document.getElementById('step3-slider-snr-lbl').innerText = `${snr} 배`;
+
+            document.getElementById('step3-b-val').innerText = `${B.toFixed(2)} MHz`;
+            document.getElementById('step3-snr-val').innerText = `${snr.toFixed(1)} 배`;
+
+            // C = B * log2(1 + SNR)
+            const capacity = B * Math.log2(1 + snr);
+            document.getElementById('step3-cap-val').innerText = `${capacity.toFixed(2)} Mbps`;
+
+            // 그래프 데이터 셋 구성 (x축을 SNR 변인으로 하여 한계 곡선 형성)
+            const xData = [];
+            const yData = [];
+            for (let x = 1; x <= 100; x += 1) {
+                xData.push(x);
+                yData.push(B * Math.log2(1 + x));
+            }
+
+            step3CurveChart.data.labels = xData;
+            step3CurveChart.data.datasets[0].data = yData;
+            step3CurveChart.data.datasets[1].data = [{x: snr, y: capacity}]; // 실시간 초점
+
+            step3CurveChart.update('none');
+        }
+
+        function initStep3Curve() {
+            const ctx = document.getElementById('step3CurveChart').getContext('2d');
+            step3CurveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: '섀넌 용량 경계선 C(x)',
+                            data: [],
+                            borderColor: '#a855f7', // purple-500
+                            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 0
+                        },
+                        {
+                            label: '현재 설정값 좌표',
+                            data: [],
+                            borderColor: '#f59e0b', // amber-500
+                            backgroundColor: '#fbbf24',
+                            pointStyle: 'circle',
+                            pointRadius: 7,
+                            showLine: false,
+                            type: 'scatter'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: 1,
+                            max: 100,
+                            title: { display: true, text: '신호대잡음비 SNR (배율)', color: '#94a3b8' },
+                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            min: 0,
+                            max: 35,
+                            title: { display: true, text: '통신 용량 C (Mbps)', color: '#94a3b8' },
+                            grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- STEP 4: 반도체 물리 노이즈 & 비트 왜곡 테스트 실시간 응용 ---
+        function updateStep4Sim() {
+            const tempC = parseFloat(document.getElementById('slider-step4-temp').value);
+            const volt = parseFloat(document.getElementById('slider-step4-volt').value);
+            const gateNode = parseFloat(document.getElementById('slider-step4-node').value);
+
+            // 레이블 출력
+            document.getElementById('val-step4-temp').innerText = `${tempC} °C (${tempC + 273} K)`;
+            document.getElementById('val-step4-volt').innerText = `${volt.toFixed(2)} V`;
+            document.getElementById('val-step4-node').innerText = `${gateNode} nm`;
+
+            // 열에 따른 가상 무작위 노이즈 강도 유도 (온도에 비례하고 나노 미세 가공 저항의 영향을 받음)
+            const T = tempC + 273; // 절대온도 K
+            // 물리 수식 흉내: Thermal Noise Power N_t = (4 * k_B * T * B * R)
+            // 미세화 노드 폭이 작을수록 발열 및 도선 미세화로 잡음 비중 증가 유동화
+            const noiseFactor = (T / 300) * (28 / gateNode) * 0.05; 
+            document.getElementById('step4-noise-level').innerText = `${noiseFactor.toFixed(3)} mW`;
+
+            // 신호 파워 S는 전압의 제곱에 가깝게 비례함
+            const signalPower = volt * volt;
+
+            // SNR 및 SNR_dB 도출
+            const snr = signalPower / noiseFactor;
+            const snr_db = 10 * Math.log10(snr);
+            document.getElementById('step4-snr-db').innerText = `${snr_db.toFixed(2)} dB`;
+
+            // 최대 섀넌 속도 연산 (가정 대역폭 1.0 MHz)
+            const cap = 1.0 * Math.log2(1 + snr);
+            document.getElementById('step4-max-capacity').innerText = `${cap.toFixed(2)} Mbps`;
+
+            // 물리적 SNR_dB를 활용해 "수신 데이터 비트 에러 오류 발생률" 확률 공식 도출
+            // 통신 에러율 수식은 대략 Q-function의 지수 함수 형태를 차용
+            // SNR이 낮아질수록 에러율이 최대 50%(완전한 무작위 노이즈)로 상승함
+            let errorRate = 0.5 * Math.exp(-0.15 * snr);
+            if (errorRate < 0.0001) errorRate = 0; // 극단 상황 절삭
+
+            document.getElementById('val-error-rate').innerText = `${(errorRate * 100).toFixed(1)}%`;
+
+            // 수신 그리드 그리기
+            buildNoisyRxGrid(errorRate);
+        }
+
+        // 송신 원본 그리드 주입
+        function buildOriginalGrid() {
+            const txContainer = document.getElementById('grid-tx');
+            txContainer.innerHTML = '';
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const isDark = originalBitmap[r][c] === 1;
+                    const cell = document.createElement('div');
+                    cell.className = `w-full h-full rounded-sm border border-slate-950 ${isDark ? 'bg-cyan-400' : 'bg-slate-800'}`;
+                    txContainer.appendChild(cell);
+                }
+            }
+        }
+
+        // 에러 비트가 개입된 수신 그리드 실시간 랜더링
+        function buildNoisyRxGrid(errorRate) {
+            const rxContainer = document.getElementById('grid-rx');
+            rxContainer.innerHTML = '';
+            
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    let bit = originalBitmap[r][c];
+                    
+                    // 지정된 에러 발생 확률에 따라 비트 반전 (0->1, 1->0) 왜곡 모델
+                    const isError = Math.random() < errorRate;
+                    if (isError) {
+                        bit = bit === 1 ? 0 : 1;
+                    }
+
+                    const isDark = bit === 1;
+                    const cell = document.createElement('div');
+                    
+                    // 만약 에러로 전송된 비트라면 붉은 경계선이나 포인트로 에러 표시
+                    const borderStyle = isError ? 'border-pink-500 border-2' : 'border-slate-950';
+                    const bgStyle = isDark ? 'bg-cyan-400' : 'bg-slate-800';
+                    
+                    cell.className = `w-full h-full rounded-sm ${borderStyle} ${bgStyle}`;
+                    rxContainer.appendChild(cell);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
