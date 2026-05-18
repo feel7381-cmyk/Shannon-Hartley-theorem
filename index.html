@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bubble Date Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Pretendard', sans-serif;
+      background: #f5f5f5;
+    }
+
+    .container {
+      padding: 16px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #C88DDD, #9CEAFE);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .logo::after {
+      content: "";
+      width: 18px;
+      height: 18px;
+      background-color: white;
+      -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+      mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+    }
+
+    .lang-btn {
+      background: black;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* 수정 1: 멤버 선택 탭 배경색을 로고와 동일한 그라데이션으로 변경 */
+    .members {
+      background: linear-gradient(135deg, #C88DDD, #9CEAFE);
+      border-radius: 30px;
+      padding: 4px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    /* 수정 2: 멤버 이름 폰트를 검정색으로 지정 */
+    .members button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 0;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      color: black; 
+      transition: 0.3s;
+    }
+
+    /* 수정 3: 활성화 효과를 유리 느낌(글래스모피즘)으로 변경 */
+    .members .active {
+      background: rgba(255, 255, 255, 0.4); /* 반투명한 흰색 배경 */
+      backdrop-filter: blur(4px); /* 배경 블러 처리 */
+      -webkit-backdrop-filter: blur(4px); /* 사파리 호환 */
+      border: 1px solid rgba(255, 255, 255, 0.5); /* 은은한 테두리 */
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: black;
+      border-radius: 30px;
+      padding: 6px 16px;
+      margin-bottom: 16px;
+      gap: 5px;
+      position: relative;
+    }
+
+    .calendar-icon {
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+      margin-right: 5px;
+    }
+
+    /* 수정 4: 모바일 달력 클릭 오류 방지를 위해 위치와 클릭 이벤트 제어 추가 */
+    #hiddenDateInput {
+      position: absolute;
+      left: -9999px; /* 화면 밖으로 완전히 밀어내어 간섭 방지 */
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none; /* 의도치 않은 터치 방지 */
+    }
+
+    .search-box select {
+      background: transparent;
+      color: white;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .date-separator {
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* 수정 7: 검색 버튼 스타일 변경 (그라데이션 배경, 흰색 폰트) */
+    .search-btn {
+      background: linear-gradient(135deg, #C88DDD, #9CEAFE);
+      color: white;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    .result {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      padding: 30px 20px;
+      text-align: center;
+      margin-bottom: 24px;
+      min-height: 40px;
+      font-size: 18px;
+    }
+
+    /* 수정 5: 사진 출력 관련 CSS (.image-text) 삭제 */
+
+    .footer {
+      border-top: 1px solid #ccc;
+      padding-top: 20px;
+    }
+
+    .support-link {
+      color: #555;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="title">
+      <div class="logo"></div>
+      <span id="titleText">aespa bubble date finder</span>
+    </div>
+    <button class="lang-btn" onclick="toggleLang()">KR / EN</button>
+  </div>
+
+  <div class="members">
+    <button onclick="selectMember(this)" class="active" data-en="Karina" data-ko="카리나">Karina</button>
+    <button onclick="selectMember(this)" data-en="Giselle" data-ko="지젤">Giselle</button>
+    <button onclick="selectMember(this)" data-en="Winter" data-ko="윈터">Winter</button>
+    <button onclick="selectMember(this)" data-en="Ningning" data-ko="닝닝">Ningning</button>
+  </div>
+
+  <div class="search-box">
+    <span class="calendar-icon" onclick="openCalendar()">📅</span>
+    <input type="date" id="hiddenDateInput" onchange="syncFromCalendar(this.value)">
+    
+    <select id="yearSelect"></select>
+    <span class="date-separator">-</span>
+    <select id="monthSelect"></select>
+    <span class="date-separator">-</span>
+    <select id="daySelect"></select>
+    
+    <button class="search-btn" id="searchBtn" onclick="search()">search</button>
+  </div>
+
+  <div class="result" id="resultBox">Select a date and press search.</div>
+  
+  <div class="footer">
+    <a href="https://x.com/aespaBBfinder" target="_blank" class="support-link">Support</a>
+  </div>
+</div>
+
+<script>
+let currentLang = "EN";
+
+function initDateSelects() {
+  const yearSelect = document.getElementById("yearSelect");
+  const monthSelect = document.getElementById("monthSelect");
+  const daySelect = document.getElementById("daySelect");
+
+  const currentYear = new Date().getFullYear();
+  for (let i = currentYear + 1; i >= 2020; i--) {
+    let opt = new Option(i, i);
+    yearSelect.add(opt);
+  }
+  yearSelect.value = currentYear;
+
+  for (let i = 1; i <= 12; i++) {
+    let val = i < 10 ? '0' + i : i;
+    monthSelect.add(new Option(val, val));
+  }
+
+  for (let i = 1; i <= 31; i++) {
+    let val = i < 10 ? '0' + i : i;
+    daySelect.add(new Option(val, val));
+  }
+}
+
+initDateSelects();
+
+function openCalendar() {
+  document.getElementById("hiddenDateInput").showPicker();
+}
+
+function syncFromCalendar(val) {
+  if(!val) return;
+  const [y, m, d] = val.split('-');
+  document.getElementById("yearSelect").value = y;
+  document.getElementById("monthSelect").value = m;
+  document.getElementById("daySelect").value = d;
+}
+
+function toggleLang() {
+  currentLang = (currentLang === "EN") ? "KO" : "EN";
+  const titleText = document.getElementById("titleText");
+  const searchBtn = document.getElementById("searchBtn");
+  const memberButtons = document.querySelectorAll(".members button");
+  const resultBox = document.getElementById("resultBox");
+
+  if (currentLang === "KO") {
+    titleText.innerText = "에스파 버블 날짜 검색기";
+    searchBtn.innerText = "검색";
+    memberButtons.forEach(btn => btn.innerText = btn.getAttribute("data-ko"));
+    if(resultBox.innerText.includes("Select a date")) resultBox.innerText = "날짜를 선택하고 검색을 누르세요.";
+  } else {
+    titleText.innerText = "aespa bubble date finder";
+    searchBtn.innerText = "search";
+    memberButtons.forEach(btn => btn.innerText = btn.getAttribute("data-en"));
+    if(resultBox.innerText.includes("날짜를 선택하고")) resultBox.innerText = "Select a date and press search.";
+  }
+}
+
+function selectMember(btn) {
+  document.querySelectorAll(".members button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+async function search() {
+  const y = document.getElementById("yearSelect").value;
+  const m = document.getElementById("monthSelect").value;
+  const d = document.getElementById("daySelect").value;
+  const selectedDate = `${y}-${m}-${d}`;
+  
+  const resultBox = document.getElementById("resultBox");
+  // 수정 5: imageOutput 변수 및 관련 로직 삭제
+  
+  const activeMember = document.querySelector(".members .active").getAttribute("data-en");
+  
+  resultBox.innerText = currentLang === "KO" ? "데이터를 불러오는 중..." : "Loading data...";
+  
+  const apiUrl = `https://opensheet.elk.sh/1GZMXgQHTZnHapcQui71NyFa6BVaJvzGARFECckuLFoE/${activeMember}`;
+
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (!data || data.length === 0) {
+      throw new Error("Sheet is empty");
+    }
+
+    const firstRowKeys = Object.keys(data[0]);
+    const colAKey = firstRowKeys[0]; 
+    const colBKey = firstRowKeys[1]; 
+
+    const matchedRow = data.find(row => {
+      const sheetDate = String(row[colBKey] || "").trim();
+      return sheetDate === selectedDate;
+    });
+
+    const notFoundText = currentLang === "KO" ? "버블이 검색되지 않음" : "Bubble not found";
+
+    if (matchedRow) {
+      const colAValue = matchedRow[colAKey];
+      
+      if (!colAValue || String(colAValue).trim() === "") {
+        resultBox.innerText = notFoundText;
+      } else {
+        resultBox.innerText = colAValue;
+      }
+    } else {
+      resultBox.innerText = notFoundText;
+    }
+
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    resultBox.innerText = currentLang === "KO" ? "데이터를 불러오는 데 실패했습니다." : "Failed to load data.";
+  }
+}
+</script>
+
+</body>
+</html>
